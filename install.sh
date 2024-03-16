@@ -1,7 +1,7 @@
 
 #PHP, Mysql e Extensões
 echo "Instalando PHP, MySQL e Extensões..."
-sudo apt update && sudo apt install -y php php-ctype php-curl php-dom php-fileinfo php-filter php-hash php-mbstring php-opcache php-pdo php-session php-tokenizer php-xml git nginx mariadb curl
+sudo apt update && sudo apt install -y php php8.3-common git nginx mariadb-server mariadb-client curl
 
 echo "A instalação está em andamento. Isso pode levar algum tempo..."
 
