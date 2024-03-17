@@ -56,11 +56,15 @@ MYSQL_SCRIPT
 # Exibir mensagem de conclusão
 echo -e "${GREEN}Banco de dados criado com sucesso!${NC}"
 
-# Instala o Composer
-echo -e "${YELLOW}Instalando o Composer...${NC}"
-curl -sS https://getcomposer.org/installer -o composer-setup.php
-sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-rm composer-setup.php
+# Instalação do Composer
+if [ -x "$(command -v composer)" ]; then
+    echo -e "${YELLOW}Composer já instalado. Pulando etapa.${NC}"
+else
+    echo -e "${YELLOW}Instalando o Composer...${NC}"
+    curl -sS https://getcomposer.org/installer -o composer-setup.php
+    sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    rm composer-setup.php
+fi
 
 # Verifica se o Composer foi instalado com sucesso
 if [ $? -eq 0 ]; then
