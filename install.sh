@@ -3,14 +3,16 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 #PHP, Mysql e Extensões
-echo "${YELLOW}Instalando PHP, MySQL e Extensões...${NC}"
+echo -e "${YELLOW}Instalando PHP, MySQL e Extensões...${NC}"
 sudo apt update && sudo apt install -y php php8.3-common git nginx mariadb-server mariadb-client curl
 
-echo "${YELLOW}A instalação está em andamento. Isso pode levar algum tempo...${NC}"
+echo -e "${YELLOW}A instalação está em andamento. Isso pode levar algum tempo...${NC}"
 
 # Solicitar a senha root do MariaDB
-read -s -p "${YELLOW}Digite a senha root para o MariaDB (deixe em branco para senha vazia):${NC} " db_root_password
-echo
+echo -e "${YELLOW}Digite a senha root para o MariaDB (deixe em branco para senha vazia):${NC} " 
+stty -echo
+read db_root_password
+stty echo
 
 # Exibir mensagem de configuração segura do MariaDB
 echo -e "${YELLOW}Configurando o MariaDB de forma segura...${NC}"
@@ -32,7 +34,7 @@ echo -e "${GREEN}Configuração do MariaDB concluída com sucesso!${NC}"
 
 # Solicita ao usuário o nome do banco de dados
 echo -e "${YELLOW}Digite o nome do banco de dados:${NC}"
-read -p "" database_name
+read database_name
 
 # Verifica se o nome do banco de dados foi fornecido
 if [ -z "$database_name" ]; then
