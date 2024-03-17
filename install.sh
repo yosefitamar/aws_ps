@@ -1,6 +1,12 @@
+#############
+# Variáveis #
+#############
 YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+RED='\033[41m'
+NC='\033[0m'
+#DEFAULT_REP=
+REP_URL='https://github.com/'
 
 #PHP, Mysql e Extensões
 echo -e "${YELLOW}Instalando PHP, MySQL e Extensões...${NC}"
@@ -60,7 +66,22 @@ rm composer-setup.php
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Composer instalado com sucesso.${NC}"
 else
-    echo "Ocorreu um erro ao instalar o Composer."
+    echo -e "${RED}Ocorreu um erro ao instalar o Composer.${NC}"
     exit 1
 fi
 
+# Altera permissões da pasta www
+sudo chmod o+w /var/www
+
+echo -e "${YELLOW}Digite o repositório no github:${NC}"
+read project_repository
+
+# Solicita ao usuário o nome da pasta para o projeto
+echo -e "${YELLOW}Digite o nome da pasta do projeto:${NC}"
+read project_folder
+
+if [ -z "$project_folder" ]; then
+    git clone "$REP_URL$project_folder"
+else
+    git clone "$REP_URL$project_folder" "$project_folder"
+fi
