@@ -45,7 +45,6 @@ fi
 # Cria o banco de dados com o nome fornecido pelo usuário
 sudo mariadb <<MYSQL_SCRIPT
 CREATE DATABASE $database_name;
-EXIT;
 MYSQL_SCRIPT
 
 # Exibir mensagem de conclusão
