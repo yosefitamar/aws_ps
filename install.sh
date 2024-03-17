@@ -73,7 +73,7 @@ fi
 # Altera permissões da pasta www
 sudo chmod o+w /var/www
 
-echo -e "${YELLOW}Digite o repositório no github:${NC}"
+echo -e "${YELLOW}Digite o repositório no github (e.g. yosef/myproject.git):${NC}"
 read project_repository
 
 # Solicita ao usuário o nome da pasta para o projeto
@@ -81,7 +81,7 @@ echo -e "${YELLOW}Digite o nome da pasta do projeto:${NC}"
 read project_folder
 
 if [ -z "$project_folder" ]; then
-    git clone "$REP_URL$project_folder"
+    echo -e "${RED}Não houve repositório. Fim do script.${NC}"
 else
-    git clone "$REP_URL$project_folder" "$project_folder"
+    git clone "$REP_URL$project_repository" "/var/www/$project_folder"
 fi
