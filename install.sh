@@ -8,10 +8,25 @@ WARNING='\033[45m'
 NC='\033[0m'
 #DEFAULT_REP=
 REP_URL='https://github.com/'
+PHP_VER='8.3'
+
+# Verifica se o parâmetro -nogit foi passado
+while [[ "$1" != "" ]]; do
+    case $1 in
+        -nogit )
+            echo "No git"
+            no_git=true
+            ;;
+        * )
+            echo "Parâmetro inválido: $1"
+            exit 1
+    esac
+    shift
+done
 
 #PHP, Mysql e Extensões
 echo -e "${INFO}Instalando PHP, MySQL e Extensões...${NC}"
-sudo apt update && sudo apt install -y php php8.3-common git nginx mariadb-server mariadb-client curl
+sudo apt update && sudo apt install -y php php$PHP_VER-common php$PHP_VER-intl php$PHP_VER-fpm php$PHP_VER-xml php$PHP_VER-zip git nginx mariadb-server mariadb-client curl unzip
 
 echo -e "${INFO}A instalação está em andamento. Isso pode levar algum tempo...${NC}"
 
@@ -74,18 +89,128 @@ else
     exit 1
 fi
 
-# Altera permissões da pasta www
-sudo chmod o+w /var/www
-
-echo -e "${INFO}Digite o repositório no github (e.g. yosef/myproject.git):${NC}"
-read project_repository
-
 # Solicita ao usuário o nome da pasta para o projeto
-echo -e "${INFO}Digite o nome da pasta do projeto:${NC}"
-read project_folder
+project_folder=""
+while [ -z "$project_folder" ]; do
+    echo -e "${INFO}Digite o nome da pasta do projeto ('q' para sair):${NC}"
+    read project_folder
 
-if [ -z "$project_folder" ]; then
-    echo -e "${ALERT}Não houve repositório. Fim do script.${NC}"
+    if [ "$project_folder" = "q" ]; then
+        echo -e "${ALERT}Encerrando o script.${NC}"
+        exit 1
+    elif [ -z "$project_folder" ]; then
+        echo -e "${WARNING}Atenção, o nome da pasta do projeto não pode estar vazio.${NC}"
+    fi
+done
+
+echo -e "${SUCCESS}Pasta do projeto definida como: $project_folder${NC}"
+
+project_path="/var/www/$project_folder"
+
+#Clone do repositório git
+if ! [ "$no_git" = true ]; then
+    # Altera permissões da pasta www
+    sudo chmod o+w /var/www
+
+    echo -e "${INFO}Digite o repositório no github (e.g. yosef/myproject.git):${NC}"
+    read project_repository
+    
+    if [ -z "$project_repository" ]; then
+        echo -e "${ALERT}Não houve repositório. Fim do script.${NC}"
+        exit 1
+    else
+        if [ -d "$project_path" ]; then
+            echo -e "${ALERT}A pasta já está ocupada, para configurar rode o script com -nogit.${NC}"
+            exit 1
+        else
+            git clone "$REP_URL$project_repository" "$project_path"
+        fi
+    fi
 else
-    git clone "$REP_URL$project_repository" "/var/www/$project_folder"
+    echo -e "${INFO}Pulando etapa de clone de repositório...${NC}"
+    if [ -d "$project_path" ]; then
+        echo -e "${INFO}Verificando a existência da pasta...${NC}"
+    else
+        echo -e "${WARNING}A pasta '$project_path' não existe.${NC}"
+    fi
 fi
+
+echo -e "${INFO}Preparando variáveis de ambiente...${NC}"
+cp "$project_path/.env.example" ".env"
+
+env_file="$project_path/.env"
+
+# Substitui os valores das variáveis no arquivo .env
+sed -i "s/^APP_NAME=.*/APP_NAME=$project_folder/" "$env_file"
+sed -i "s/^DB_DATABASE=.*/DB_DATABASE=$database_name/" "$env_file"
+sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$db_root_password/" "$env_file"
+
+echo -e "${INFO}Variáveis alteradas com sucesso no arquivo $env_file.${NC}"
+
+cd $project_path
+composer install --optimize-autoloader --no-dev
+
+echo "parou."
+exit 1
+
+echo -e "${INFO}Alterando permissões do Storage e Bootstrap...${NC}"
+sudo chmod -R 777 storage
+sudo chmod -R 777 bootstrap
+echo -e "${SUCCESS}Permissões alteradas com sucesso!${NC}"
+
+echo -e "${INFO}Ajustando o NGINX...${NC}"
+sudo mv "/etc/nginx/sites-available/default" "/etc/nginx/sites-available/backup"
+
+# Define o caminho para o arquivo de configuração do Nginx
+nginx_config="/etc/nginx/sites-available/default"
+
+# Conteúdo do arquivo de configuração
+nginx_content="server {
+    listen 80;
+    listen [::]:80;
+    server_name example.com;
+    root $project_path/public;
+
+    add_header X-Frame-Options 'SAMEORIGIN';
+    add_header X-Content-Type-Options 'nosniff';
+
+    index index.php;
+
+    charset utf-8;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php$PHP_VER-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}"
+
+# Cria o arquivo de configuração
+echo "$nginx_content" | sudo tee "$nginx_config" > /dev/null
+
+# Verifica se o arquivo foi criado com sucesso
+if [ -f "$nginx_config" ]; then
+    echo -e "${SUCCESS}Arquivo de configuração do Nginx criado com sucesso em: $nginx_config ${NC}"
+else
+    echo -e "${ALERT}Erro ao criar o arquivo de configuração do Nginx. ${NC}"
+    exit 1
+fi
+
+sudo systemctl restart nginx
+echo -e "${SUCCESS}NGINX pronto!${NC}"
+
+echo -e "${INFO}Gerando chave da aplicação...${NC}"
+php artisan key:generate
