@@ -77,15 +77,15 @@ fi
 while true; do
     # Solicita ao usuário o nome do novo usuário
     echo -e "${INFO}Informe o usuário do BD ('q' para sair):${NC}"
-    read db_user
+    read db_username
 
     # Verifica se o usuário digitou 'q' para sair
-    if [ "$db_user" == "q" ]; then
+    if [ "$db_username" == "q" ]; then
         exit 0
     fi
 
     # Verifica se o nome do novo usuário está vazio
-    if [ -z "$db_user" ]; then
+    if [ -z "$db_username" ]; then
         echo -e "${WARNING}Atenção, o nome do usuário não pode ser vazio!${NC}"
     else
         break
@@ -95,21 +95,21 @@ done
 # Solicita ao usuário a senha para o novo usuário
 echo -e "${INFO}Digite a senha para o novo usuário:${NC}"
 stty -echo
-read db_user_password
+read db_password
 stty echo
 
 # Cria o novo usuário com a senha fornecida
-sudo mysql -e "CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_user_password';"
-echo -e "${SUCCESS}Usuário '$db_user' criado com sucesso.${NC}"
+sudo mysql -e "CREATE USER '$db_username'@'localhost' IDENTIFIED BY '$db_password';"
+echo -e "${SUCCESS}Usuário '$db_username' criado com sucesso.${NC}"
 
 # Concede ao novo usuário privilégios para acessar e gerenciar o banco de dados
-sudo mysql -e "GRANT ALL PRIVILEGES ON $database_name.* TO '$db_user'@'localhost';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON $database_name.* TO '$db_username'@'localhost';"
 sudo mysql -e "FLUSH PRIVILEGES;"
-echo -e "${SUCCESS}Privilégios concedidos para o usuário '$db_user' no banco de dados '$database_name'.${NC}"
+echo -e "${SUCCESS}Privilégios concedidos para o usuário '$db_username' no banco de dados '$database_name'.${NC}"
 
 # Exibe informações sobre o novo banco de dados e usuário
 echo -e "${INFO}Banco de dados: $database_name"
-echo -e "Usuário: $db_user"
+echo -e "Usuário: $db_username"
 echo -e "Senha: ********${NC}"
 
 # Instalação do Composer
@@ -194,7 +194,8 @@ env_file="$project_path/.env"
 # Substitui os valores das variáveis no arquivo .env
 sed -i "s/^APP_NAME=.*/APP_NAME=$project_folder/" "$env_file"
 sed -i "s/^DB_DATABASE=.*/DB_DATABASE=$database_name/" "$env_file"
-sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$db_root_password/" "$env_file"
+sed -i "s/^DB_USERNAME=.*/DB_USERNAME=$db_username/" "$env_file"
+sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$db_password/" "$env_file"
 
 echo -e "${INFO}Variáveis alteradas com sucesso no arquivo $env_file.${NC}"
 
