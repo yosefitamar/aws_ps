@@ -118,7 +118,7 @@ if ! [ "$no_git" = true ]; then
     read project_repository
     
     if [ -z "$project_repository" ]; then
-        echo -e "${ALERT}Não houve repositório. Fim do script.${NC}"
+        echo -e "${ALERT}Nenhum repositório informado.${NC}"
         exit 1
     else
         if [ -d "$project_path" ]; then
@@ -128,7 +128,7 @@ if ! [ "$no_git" = true ]; then
             git clone "$REP_URL$project_repository" "$project_path"
             clone_status=$?
             if [ $clone_status -ne 0 ]; then
-                echo "Erro ao clonar o repositório. Saindo do script."
+                echo -e "${ALERT}Erro ao clonar repositório.${NC}"
                 exit 1
             fi
         fi
