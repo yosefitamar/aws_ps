@@ -143,7 +143,12 @@ else
 fi
 
 echo -e "${INFO}Preparando variáveis de ambiente...${NC}"
+
 cp "$project_path/.env.example" ".env"
+if [ $? -ne 0 ]; then
+    echo -e "${ALERT}Erro ao copiar o arquivo .env${NC}"
+    exit 1
+fi
 
 env_file="$project_path/.env"
 
@@ -156,9 +161,6 @@ echo -e "${INFO}Variáveis alteradas com sucesso no arquivo $env_file.${NC}"
 
 cd $project_path
 composer install --optimize-autoloader --no-dev
-
-echo "parou."
-exit 1
 
 echo -e "${INFO}Alterando permissões do Storage e Bootstrap...${NC}"
 sudo chmod -R 777 storage
