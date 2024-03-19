@@ -126,6 +126,11 @@ if ! [ "$no_git" = true ]; then
             exit 1
         else
             git clone "$REP_URL$project_repository" "$project_path"
+            clone_status=$?
+            if [ $clone_status -ne 0 ]; then
+                echo "Erro ao clonar o repositório. Saindo do script."
+                exit 1
+            fi
         fi
     fi
 else
