@@ -28,7 +28,7 @@ done
 
 #PHP, Mysql e Extensões
 echo -e "${INFO}Instalando PHP, MySQL e Extensões...${NC}"
-sudo apt update && sudo apt install -y php php$PHP_VER-common php$PHP_VER-intl php$PHP_VER-fpm php$PHP_VER-xml php$PHP_VER-zip git nginx mariadb-server mariadb-client curl unzip
+sudo apt update && sudo apt install -y php php$PHP_VER-common php$PHP_VER-mysql php$PHP_VER-intl php$PHP_VER-fpm php$PHP_VER-xml php$PHP_VER-zip git nginx mariadb-server mariadb-client curl unzip
 
 echo -e "${INFO}A instalação está em andamento. Isso pode levar algum tempo...${NC}"
 
@@ -72,6 +72,45 @@ else
         echo -e "${SUCCESS}Banco de dados '$database_name' criado com sucesso.${NC}"
     fi
 fi
+
+# Loop para solicitar o nome do novo usuário
+while true; do
+    # Solicita ao usuário o nome do novo usuário
+    echo -e "${INFO}Informe o usuário do BD ('q' para sair):${NC}"
+    read db_user
+
+    # Verifica se o usuário digitou 'q' para sair
+    if [ "$db_user" == "q" ]; then
+        exit 0
+    fi
+
+    # Verifica se o nome do novo usuário está vazio
+    if [ -z "$db_user" ]; then
+        echo "${WARNING}Atenção, o nome do usuário não pode ser vazio!{$NC}"
+    else
+        break
+    fi
+done
+
+# Solicita ao usuário a senha para o novo usuário
+echo -e "${INFO}Digite a senha para o novo usuário:${NC}"
+stty -echo
+read db_user_password
+stty echo
+
+# Cria o novo usuário com a senha fornecida
+sudo mysql -e "CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_user_password';"
+echo -e "${SUCCESS}Usuário '$db_user' criado com sucesso.${NC}"
+
+# Concede ao novo usuário privilégios para acessar e gerenciar o banco de dados
+sudo mysql -e "GRANT ALL PRIVILEGES ON $database_name.* TO '$db_user'@'localhost';"
+sudo mysql -e "FLUSH PRIVILEGES;"
+echo -e "${SUCCESS}Privilégios concedidos para o usuário '$db_user' no banco de dados '$database_name'.${NC}"
+
+# Exibe informações sobre o novo banco de dados e usuário
+echo -e "${INFO}Banco de dados: $database_name"
+echo -e "Usuário: $db_user"
+echo -e "Senha: ********${NC}"
 
 # Instalação do Composer
 if [ -x "$(command -v composer)" ]; then
