@@ -86,7 +86,7 @@ while true; do
 
     # Verifica se o nome do novo usuário está vazio
     if [ -z "$db_user" ]; then
-        echo "${WARNING}Atenção, o nome do usuário não pode ser vazio!{$NC}"
+        echo -e "${WARNING}Atenção, o nome do usuário não pode ser vazio!${NC}"
     else
         break
     fi
