@@ -8,7 +8,9 @@ WARNING='\033[45m'
 NC='\033[0m'
 #DEFAULT_REP=
 REP_URL='https://github.com/'
-PHP_VER='8.3'
+
+echo -e "${INFO}Digite a versão do PHP:${NC}"
+read PHP_VER
 
 # Verifica se o parâmetro -nogit foi passado
 while [[ "$1" != "" ]]; do
