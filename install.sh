@@ -159,6 +159,7 @@ else
 fi
 
 cd $project_path
+rm composer.lock
 composer install --optimize-autoloader --no-dev
 
 echo -e "${INFO}Preparando variáveis de ambiente...${NC}"
