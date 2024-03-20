@@ -158,6 +158,9 @@ else
     fi
 fi
 
+cd $project_path
+composer install --optimize-autoloader --no-dev
+
 echo -e "${INFO}Preparando variáveis de ambiente...${NC}"
 
 cp "$project_path/.env.example" ".env"
@@ -174,9 +177,6 @@ sed -i "s/^DB_USERNAME=.*/DB_USERNAME=$db_username/" "$env_file"
 sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$db_password/" "$env_file"
 
 echo -e "${INFO}Variáveis alteradas com sucesso no arquivo $env_file.${NC}"
-
-cd $project_path
-composer install --optimize-autoloader --no-dev
 
 echo -e "${INFO}Alterando permissões do Storage e Bootstrap...${NC}"
 sudo chmod -R 777 storage
