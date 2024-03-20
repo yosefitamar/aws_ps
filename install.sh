@@ -25,7 +25,7 @@ while [[ "$1" != "" ]]; do
 done
 
 echo -e "${INFO}Instalando PHP, MySQL e Extensões...${NC}"
-sudo apt update && sudo apt install -y php php$PHP_VER-common php$PHP_VER-mysql php$PHP_VER-intl php$PHP_VER-fpm php$PHP_VER-xml php$PHP_VER-zip git nginx mariadb-server mariadb-client curl unzip
+sudo apt update && sudo apt install -y php php$PHP_VER-common php$PHP_VER-curl php$PHP_VER-mbstring php$PHP_VER-mysql php$PHP_VER-intl php$PHP_VER-fpm php$PHP_VER-xml php$PHP_VER-zip git nginx mariadb-server mariadb-client curl unzip
 
 echo -e "${INFO}A instalação está em andamento. Isso pode levar algum tempo...${NC}"
 
@@ -178,11 +178,6 @@ sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$db_password/" "$env_file"
 
 echo -e "${INFO}Variáveis alteradas com sucesso no arquivo $env_file.${NC}"
 
-echo -e "${INFO}Alterando permissões do Storage e Bootstrap...${NC}"
-sudo chmod -R 777 storage
-sudo chmod -R 777 bootstrap
-echo -e "${SUCCESS}Permissões alteradas com sucesso!${NC}"
-
 echo -e "${INFO}Ajustando o NGINX...${NC}"
 sudo mv "/etc/nginx/sites-available/default" "/etc/nginx/sites-available/backup"
 
@@ -229,6 +224,11 @@ else
     echo -e "${ALERT}Erro ao criar o arquivo de configuração do Nginx. ${NC}"
     exit 1
 fi
+
+echo -e "${INFO}Alterando permissões do Storage e Bootstrap...${NC}"
+sudo chmod -R 777 storage
+sudo chmod -R 777 bootstrap
+echo -e "${SUCCESS}Permissões alteradas com sucesso!${NC}"
 
 sudo systemctl restart nginx
 echo -e "${SUCCESS}NGINX pronto!${NC}"
